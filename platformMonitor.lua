@@ -1,42 +1,45 @@
+function setupSettings()
+    local settingsLoaded = settings.load(".settings")
+
+    if not settingsLoaded or settings.get("platformMonitor.firstTimeSetupComplete", false) ~= true then
+        print("Welcome to Platform Monitor 1.0. Please complete the first time setup.")
+    
+        print("Enter modem side (left, top, right, bottom, back)")
+        write("> ")
+        modemSide = read()
+    
+        print("Enter digital receiver side (left, top, right, bottom, back)")
+        write("> ")
+        receiverSide = read()
+    
+        print("Enter station name")
+        write("> ")
+        stationName = read()
+    
+        settings.set("platformMonitor.modemSide", modemSide)
+        settings.set("platformMonitor.receiverSide", receiverSide)
+        settings.set("platformMonitor.stationNamee", stationName)
+        settings.set("platformMonitor.firstTimeSetupComplete", true)
+        settings.save(".settings")
+
+        print("First time setup completed!")
+    else
+        print("Loading settings...")
+
+        modemSide = settings.get("platformMonitor.modemSide")
+        receiverSide = settings.get("platformMonitor.receiverSide")
+        stationName = settings.get("platformMonitor.stationNamee")
+    end
+end
+
 local RED = 5
 local GREEN = 1
 
-local settingsLoaded = settings.load(".settings")
-
-if not settingsLoaded or settings.get("platformMonitor.firstTimeSetupComplete", false) ~= true then
-    print("Welcome to Platform Monitor 1.0. Please complete the first time setup.")
-
-    print("Enter modem side (left, top, right, bottom, back)")
-    write("> ")
-    modemSide = read()
-
-    print("Enter digital receiver side (left, top, right, bottom, back)")
-    write("> ")
-    receiverSide = read()
-
-    print("Enter station name")
-    write("> ")
-    stationName = read()
-
-    print("First time setup completed!")
-
-    settings.set("platformMonitor.modemSide", modemSide)
-    settings.set("platformMonitor.receiverSide", receiverSide)
-    settings.set("platformMonitor.stationNamee", stationName)
-    settings.set("platformMonitor.firstTimeSetupComplete", true)
-    settings.save(".settings")
-else
-    modemSide = settings.get("platformMonitor.modemSide")
-    receiverSide = settings.get("platformMonitor.receiverSide")
-    stationName = settings.get("platformMonitor.stationNamee")
-end
+setupSettings()
 
 local modem = peripheral.wrap(modemSide)
 local receiver = peripheral.wrap(receiverSide)
 local station = stationName
-
-print("Beginning platform track monitoring.")
-modem.open(2)
 
 function waitForRequestedTrain()
     print("Waiting for requested train to arrive...")
@@ -62,6 +65,11 @@ function requestTrain()
     waitForRequestedTrain()
 end
 
+
+print("Beginning platform track monitoring.")
+modem.open(2)
+
+-- Main loop
 while true do
     if receiver.getAspect("platform") == GREEN then
         print("No train at platform, rechecking in 10 seconds.")
